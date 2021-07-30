@@ -19,6 +19,8 @@ abstract contract VemeStorage{
   
   mapping(uint256 => address) public creatorList;
   
+  mapping(uint256 => string)public ipfsHashes;
+  
   uint256 public remixerRevenueRate;
   
   uint256 public creatorRevenueRate;
@@ -160,21 +162,22 @@ contract Veme is Ownable, ERC165, IERC1155, IERC1155MetadataURI,VemeStorage {
     function setRemixerRevuneRate( uint256 _rate)external onlyOwner{
         remixerRevenueRate = _rate;
     }
-     /**
+    /**
      * @dev To create NFT.
      */
-    function createNFT()external returns(bool){
+    function createNFT(string memory _ipfshash)external returns(bool){
         address creatorAddress = _msgSender();
         _mint(creatorAddress,VeMeId,1,"");
         creatorList[VeMeId] = creatorAddress;
+        ipfsHashes[VeMeId] = _ipfshash;
         VeMeId = VeMeId.add(1);
         return true;
         
     }
     /**
-     * @dev To apply for Lincense as remixer
+     * @dev To apply for Licence for specific NFT.
      */
-    function addLicence(uint256 _VemeId)external returns(bool){
+    function addLicense(uint256 _VemeId)external returns(bool){
         address userAddress = _msgSender();
         require(exists(_VemeId),"ERR_ID_DOESNOT_EXISTS");
         require(userAddress != creatorList [_VemeId],"ERR_CREATOR_CANNOT_BE_REMIXER");
@@ -182,14 +185,20 @@ contract Veme is Ownable, ERC165, IERC1155, IERC1155MetadataURI,VemeStorage {
         remixerList[_VemeId].push(userAddress);
         return true;
     }
-    
     /**
-     * @dev To retrieve the remixer List.
+     * @dev Retrieving. the remixer list
      */
     function getRemixerList(uint256 _VemeId)external view returns(address[] memory){
         require(exists(_VemeId),"ERR_NFT_DOESNOT_EXIST");
         return remixerList[_VemeId];
-        
+         
+    }
+    /**
+     * @dev Retrieving. the ipfs hash of the NFT
+     */
+    function getIpfsHashofId( uint256 _VemeId)external view returns(string memory){
+        require(exists(_VemeId),"ERR_NFT_DOESNOT_EXIST");
+        return ipfsHashes[_VemeId];
     }
 
     /**
